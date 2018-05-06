@@ -1,0 +1,15 @@
+{
+  "name": "vEOS-lab-4.20.1F",
+  "description": "Arista vEOS 4.20.1F",
+  "versions": [
+    {
+      "version": "4.20.1F",
+      "providers": [
+        {
+          "name": "virtualbox",
+          "url": "file:///Users/awang200/Work/GHE/awang200/occam/og/vEOS-lab-4.20.1F-virtualbox.box"
+        }
+      ]
+    }
+  ]
+}
