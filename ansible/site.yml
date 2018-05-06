@@ -1,0 +1,18 @@
+---
+
+- hosts: network
+
+  connection: local
+  gather_facts: 'False'
+
+  vars:
+    cli:
+      username: vagrant
+      password: vagrant
+
+  roles:
+    - leafgroups
+    - hostname
+    - interfaces
+    - routing
+    - ntp
