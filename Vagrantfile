@@ -1,7 +1,20 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-default_box = 'vEOS-lab-4.18.1F'
+default_box = 'vEOS-lab-4.20.1F'
+server_box = 'ubuntu/xenial64'
+
+def path_exists?(path)
+  File.directory?(path)
+end
+
+$dimage = ENV.fetch("DIMAGE", "netbricks")
+$dtag = ENV.fetch("DTAG", "latest")
+$dproject = ENV.fetch("DPROJECT", "williamofockham")
+$nbpath = ENV.fetch("NBPATH", "../NetBricks")
+$mgpath = ENV.fetch("MGPATH", "../MoonGen")
+$dpdk_driver = ENV.fetch("DPDK_DRIVER", "uio_pci_generic")
+$dpdk_devices = ENV.fetch("DPDK_DEVICES", "0000:00:08.0 0000:00:09.0")
 
 Vagrant.configure(2) do |config|
   config.vm.provision "ansible" do |ansible|
@@ -10,6 +23,8 @@ Vagrant.configure(2) do |config|
       "leaf" => ["leaf-1","leaf-3","leaf-2","leaf-5","leaf-4","leaf-6",],
       "spine" => ["spine-1","spine-2",],
       "host" => ["server-4","server-2","server-3","server-1","server-6","server-5",],
+      "client" => ["cli-1",],
+      "og" => ["og-1", "og-3",],
       "network:children" => ["leaf","spine","edge",]
     }
   end
@@ -28,6 +43,16 @@ Vagrant.configure(2) do |config|
     spine01.vm.network 'private_network',
                        virtualbox__intnet: 's01l04',
                        ip: '169.254.1.11', auto_config: false
+    spine01.vm.network 'private_network',
+		       virtualbox__intnet: 's01cli',
+		       ip: '169.254.1.11', auto_config: false
+    spine01.vm.provider 'virtualbox' do |vb|
+      vb.customize ['modifyvm', :id, '--nicpromisc2', 'allow-all']
+      vb.customize ['modifyvm', :id, '--nicpromisc3', 'allow-all']
+      vb.customize ['modifyvm', :id, '--nicpromisc4', 'allow-all']
+      vb.customize ['modifyvm', :id, '--nicpromisc5', 'allow-all']
+      vb.customize ['modifyvm', :id, '--nicpromisc6', 'allow-all']
+    end
   config.vbguest.auto_update = false
   end
 
@@ -45,7 +70,17 @@ Vagrant.configure(2) do |config|
     spine02.vm.network 'private_network',
                        virtualbox__intnet: 's02l04',
                        ip: '169.254.1.11', auto_config: false
-  config.vbguest.auto_update = false
+    spine02.vm.network 'private_network',
+		       virtualbox__intnet: 's02cli',
+		       ip: '169.254.1.11', auto_config: false
+    spine02.vm.provider 'virtualbox' do |vb|
+      vb.customize ['modifyvm', :id, '--nicpromisc2', 'allow-all']
+      vb.customize ['modifyvm', :id, '--nicpromisc3', 'allow-all']
+      vb.customize ['modifyvm', :id, '--nicpromisc4', 'allow-all']
+      vb.customize ['modifyvm', :id, '--nicpromisc5', 'allow-all']
+      vb.customize ['modifyvm', :id, '--nicpromisc6', 'allow-all']
+    end
+   config.vbguest.auto_update = false
   end
 
   config.vm.define 'leaf-1' do |leaf01|
@@ -59,6 +94,15 @@ Vagrant.configure(2) do |config|
     leaf01.vm.network 'private_network',
                        virtualbox__intnet: 'l01l02',
                        ip: '169.254.1.11', auto_config: false
+    leaf01.vm.network 'private_network',
+                       virtualbox__intnet: 'l01og1',
+                       ip: '169.254.1.11', auto_config: false
+    leaf01.vm.provider 'virtualbox' do |vb|
+      vb.customize ['modifyvm', :id, '--nicpromisc2', 'allow-all']
+      vb.customize ['modifyvm', :id, '--nicpromisc3', 'allow-all']
+      vb.customize ['modifyvm', :id, '--nicpromisc4', 'allow-all']
+      vb.customize ['modifyvm', :id, '--nicpromisc5', 'allow-all']
+    end
   config.vbguest.auto_update = false
   end
 
@@ -73,6 +117,11 @@ Vagrant.configure(2) do |config|
     leaf02.vm.network 'private_network',
                        virtualbox__intnet: 'l01l02',
                        ip: '169.254.1.11', auto_config: false
+    leaf02.vm.provider 'virtualbox' do |vb|
+      vb.customize ['modifyvm', :id, '--nicpromisc2', 'allow-all']
+      vb.customize ['modifyvm', :id, '--nicpromisc3', 'allow-all']
+      vb.customize ['modifyvm', :id, '--nicpromisc4', 'allow-all']
+    end
   config.vbguest.auto_update = false
   end
   
@@ -87,6 +136,15 @@ Vagrant.configure(2) do |config|
     leaf03.vm.network 'private_network',
                        virtualbox__intnet: 'l03l04',
                        ip: '169.254.1.11', auto_config: false
+    leaf03.vm.network 'private_network',
+                       virtualbox__intnet: 'l03og3',
+                       ip: '169.254.1.11', auto_config: false
+    leaf03.vm.provider 'virtualbox' do |vb|
+      vb.customize ['modifyvm', :id, '--nicpromisc2', 'allow-all']
+      vb.customize ['modifyvm', :id, '--nicpromisc3', 'allow-all']
+      vb.customize ['modifyvm', :id, '--nicpromisc4', 'allow-all']
+      vb.customize ['modifyvm', :id, '--nicpromisc5', 'allow-all']
+    end
   config.vbguest.auto_update = false
   end
 
@@ -101,7 +159,93 @@ Vagrant.configure(2) do |config|
     leaf04.vm.network 'private_network',
                        virtualbox__intnet: 'l03l04',
                        ip: '169.254.1.11', auto_config: false
+    leaf04.vm.provider 'virtualbox' do |vb|
+      vb.customize ['modifyvm', :id, '--nicpromisc2', 'allow-all']
+      vb.customize ['modifyvm', :id, '--nicpromisc3', 'allow-all']
+      vb.customize ['modifyvm', :id, '--nicpromisc4', 'allow-all']
+    end
   config.vbguest.auto_update = false
+  end
+
+  config.vm.define 'cli-1' do |cli1|
+    cli1.vm.box = server_box
+    cli1.vm.hostname = 'cli-1'
+    cli1.disksize.size = "30GB"
+    cli1.vm.synced_folder ".", "/vagrant", disabled: false
+    if path_exists?($nbpath)
+      cli1.vm.synced_folder $nbpath, "/NetBricks", disabled: false
+    end
+    if path_exists?($mgpath)
+      cli1.vm.synced_folder $mgpath, "/MoonGen", disabled: false
+    end
+    cli1.vm.network 'private_network',
+                       virtualbox__intnet: 's01cli',
+                       ip: '10.0.251.3'
+    cli1.vm.network 'private_network',
+                       virtualbox__intnet: 's02cli',
+                       ip: '10.0.252.3'
+    cli1.vm.provider 'virtualbox' do |vb|
+      vb.name = 'cli-1'
+      vb.cpus = 2
+      vb.memory = 1024
+      vb.customize ['modifyvm', :id, '--nicpromisc2', 'allow-all']
+      vb.customize ['modifyvm', :id, '--nicpromisc3', 'allow-all']
+    end
+
+    config.vbguest.auto_update = false
+  end
+
+  config.vm.define 'og-1' do |og1|
+    og1.vm.box = server_box
+    og1.vm.hostname = 'og-1'
+    og1.disksize.size = "30GB"
+    og1.vm.synced_folder ".", "/vagrant", disabled: false
+    if path_exists?($nbpath)
+      og1.vm.synced_folder $nbpath, "/NetBricks", disabled: false
+    end
+    if path_exists?($mgpath)
+      og1.vm.synced_folder $mgpath, "/MoonGen", disabled: false
+    end
+    og1_network = '10.0.101'
+    og1_host = '2'
+    og1.vm.network 'private_network',
+                       virtualbox__intnet: 'l01og1',
+                       ip: og1_network + '.' + og1_host
+    og1.vm.provider 'virtualbox' do |vb|
+      vb.name = 'og-1'
+      vb.cpus = 4
+      vb.memory = 4096
+      vb.customize ['modifyvm', :id, '--nicpromisc2', 'allow-all']
+    end
+    og1.vm.provision 'shell', privileged: true, path: 'og-setup.sh', args: [og1_network, og1_host]
+									    
+    config.vbguest.auto_update = false
+  end
+
+  config.vm.define 'og-3' do |og3|
+    og3.vm.box = server_box
+    og3.vm.hostname = 'og-3'
+    og3.disksize.size = "30GB"
+    og3.vm.synced_folder ".", "/vagrant", disabled: false
+    if path_exists?($nbpath)
+      og3.vm.synced_folder $nbpath, "/NetBricks", disabled: false
+    end
+    if path_exists?($mgpath)
+      og3.vm.synced_folder $mgpath, "/MoonGen", disabled: false
+    end
+    og3_network = '10.0.102'
+    og3_host = '2'
+    og3.vm.network 'private_network',
+                       virtualbox__intnet: 'l03og3',
+                       ip: og3_network + '.' + og3_host
+    og3.vm.provider 'virtualbox' do |vb|
+      vb.name = 'og-3'
+      vb.cpus = 4
+      vb.memory = 4096
+      vb.customize ['modifyvm', :id, '--nicpromisc2', 'allow-all']
+    end
+    og3.vm.provision 'shell', privileged: true, path: 'og-setup.sh', args: [og3_network, og3_host]
+    config.vbguest.auto_update = false
   end
 
 end
