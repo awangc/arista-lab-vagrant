@@ -1,9 +1,9 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
+Vagrant::DEFAULT_SERVER_URL.replace('https://vagrantcloud.com')
 default_box = 'vEOS-lab-4.20.1F'
 server_box = 'ubuntu/xenial64'
-
 def path_exists?(path)
   File.directory?(path)
 end
@@ -31,6 +31,7 @@ Vagrant.configure(2) do |config|
 
   config.vm.define 'spine-1' do |spine01|
     spine01.vm.box = default_box
+    spine01.vm.boot_timeout = 600
     spine01.vm.network 'private_network',
                        virtualbox__intnet: 's01l01',
                        ip: '169.254.1.11', auto_config: false
@@ -58,6 +59,7 @@ Vagrant.configure(2) do |config|
 
   config.vm.define 'spine-2' do |spine02|
     spine02.vm.box = default_box
+    spine02.vm.boot_timeout = 600
     spine02.vm.network 'private_network',
                        virtualbox__intnet: 's02l01',
                        ip: '169.254.1.11', auto_config: false
@@ -159,6 +161,7 @@ Vagrant.configure(2) do |config|
     leaf04.vm.network 'private_network',
                        virtualbox__intnet: 'l03l04',
                        ip: '169.254.1.11', auto_config: false
+    leaf04.vm.boot_timeout = 600
     leaf04.vm.provider 'virtualbox' do |vb|
       vb.customize ['modifyvm', :id, '--nicpromisc2', 'allow-all']
       vb.customize ['modifyvm', :id, '--nicpromisc3', 'allow-all']
@@ -186,8 +189,6 @@ Vagrant.configure(2) do |config|
                        ip: '10.0.252.3'
     cli1.vm.provider 'virtualbox' do |vb|
       vb.name = 'cli-1'
-      vb.cpus = 2
-      vb.memory = 1024
       vb.customize ['modifyvm', :id, '--nicpromisc2', 'allow-all']
       vb.customize ['modifyvm', :id, '--nicpromisc3', 'allow-all']
     end
@@ -197,6 +198,7 @@ Vagrant.configure(2) do |config|
 
   config.vm.define 'og-1' do |og1|
     og1.vm.box = server_box
+    og1.vm.boot_timeout = 600
     og1.vm.hostname = 'og-1'
     og1.disksize.size = "30GB"
     og1.vm.synced_folder ".", "/vagrant", disabled: false
