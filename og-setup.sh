@@ -6,8 +6,8 @@ sudo apt-get -q update
 sudo apt-get -q install -y cmake mg make git gcc linux-headers-`uname -r` linux-image-extra-$(uname -r) libncursesw5 libncurses5 libtinfo5 git
 
 # install quagga-core 1.2.4 from ubuntu/bionic64
-wget http://launchpadlibrarian.net/361891995/quagga-core_1.2.4-1_amd64.deb
-wget http://launchpadlibrarian.net/284875588/libreadline7_7.0-0ubuntu2_amd64.deb
+wget -q http://launchpadlibrarian.net/361891995/quagga-core_1.2.4-1_amd64.deb > /dev/null
+wget -q http://launchpadlibrarian.net/284875588/libreadline7_7.0-0ubuntu2_amd64.deb /dev/null
 sudo dpkg -i libreadline7_7.0-0ubuntu2_amd64.deb quagga-core_1.2.4-1_amd64.deb
 sudo rm -f libreadline7_7.0-0ubuntu2_amd64.deb quagga-core_1.2.4-1_amd64.deb
 
@@ -27,23 +27,24 @@ source /etc/profile.d/golang.sh
 mkdir -p $GOPATH
 mkdir -p $GOROOT
 cd $GOROOT/..
-wget https://storage.googleapis.com/golang/go${GO_VERSION}.linux-amd64.tar.gz > /dev/null 2>&1
+wget -q https://storage.googleapis.com/golang/go${GO_VERSION}.linux-amd64.tar.gz > /dev/null 
 tar zxf go${GO_VERSION}.linux-amd64.tar.gz
 
 # install gobgp and gobgpd
 go get -v github.com/osrg/gobgp/gobgpd
 go get -v github.com/osrg/gobgp/gobgp
 
+mkdir -p /etc/gobgp
 cat << GOBGPD_CONF > /etc/gobgp/gobgpd.conf
 global:
   config:
-    as: 65001
+    as: ${3}
     router-id: ${1}.${2}
 
 neighbors:
   - config:
       neighbor-address: ${1}.252
-      peer-as: 65001
+      peer-as: ${3}
 GOBGPD_CONF
 
 #id gobgpd || useradd -r gobgpd

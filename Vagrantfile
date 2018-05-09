@@ -210,16 +210,19 @@ Vagrant.configure(2) do |config|
     end
     og1_network = '10.0.101'
     og1_host = '2'
+    og1_asn = '65001'
     og1.vm.network 'private_network',
                        virtualbox__intnet: 'l01og1',
                        ip: og1_network + '.' + og1_host
+    og1.vm.network 'private_network',
+                       virtualbox__intnet: 'og1priv',
+                       ip: '192.168.0.' + og1_host
     og1.vm.provider 'virtualbox' do |vb|
       vb.name = 'og-1'
-      vb.cpus = 4
-      vb.memory = 4096
       vb.customize ['modifyvm', :id, '--nicpromisc2', 'allow-all']
+      vb.customize ['modifyvm', :id, '--nicpromisc3', 'allow-all']
     end
-    og1.vm.provision 'shell', privileged: true, path: 'og-setup.sh', args: [og1_network, og1_host]
+    og1.vm.provision 'shell', privileged: true, path: 'og-setup.sh', args: [og1_network, og1_host, og1_asn]
 									    
     config.vbguest.auto_update = false
   end
@@ -236,17 +239,20 @@ Vagrant.configure(2) do |config|
       og3.vm.synced_folder $mgpath, "/MoonGen", disabled: false
     end
     og3_network = '10.0.102'
-    og3_host = '2'
+    og3_host = '4'
+    og3_asn = '65003'
     og3.vm.network 'private_network',
                        virtualbox__intnet: 'l03og3',
                        ip: og3_network + '.' + og3_host
+    og3.vm.network 'private_network',
+                       virtualbox__intnet: 'og3priv',
+                       ip: '192.168.0.' + og3_host
     og3.vm.provider 'virtualbox' do |vb|
       vb.name = 'og-3'
-      vb.cpus = 4
-      vb.memory = 4096
       vb.customize ['modifyvm', :id, '--nicpromisc2', 'allow-all']
+      vb.customize ['modifyvm', :id, '--nicpromisc3', 'allow-all']
     end
-    og3.vm.provision 'shell', privileged: true, path: 'og-setup.sh', args: [og3_network, og3_host]
+    og3.vm.provision 'shell', privileged: true, path: 'og-setup.sh', args: [og3_network, og3_host, og3_asn]
     config.vbguest.auto_update = false
   end
 
