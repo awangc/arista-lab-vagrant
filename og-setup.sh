@@ -33,51 +33,39 @@ tar zxf go${GO_VERSION}.linux-amd64.tar.gz
 # install gobgp and gobgpd
 go get -v github.com/osrg/gobgp/gobgpd
 go get -v github.com/osrg/gobgp/gobgp
-
-mkdir -p /etc/gobgp
-cat << GOBGPD_CONF > /etc/gobgp/gobgpd.conf
-global:
-  config:
-    as: ${3}
-    router-id: ${1}.${2}
-
-neighbors:
-  - config:
-      neighbor-address: ${1}.252
-      peer-as: ${3}
-GOBGPD_CONF
-
-#id gobgpd || useradd -r gobgpd
 cp $GOPATH/bin/* /usr/local/sbin
-mkdir -p /etc/gobgp
-cp /vagrant/config/gobgpd.service /etc/systemd/system
-systemctl daemon-reload
 
-#cp /vagrant/config/ospfd.conf /etc/quagga
-#cat >> /etc/quagga/ospfd.conf <<CONFIG
-#router ospf
-#  ospf router-id ${1}
-#  network ${1}/32 area 0.0.0.0
-#!
-#line vty
-#!
-#CONFIG
-#systemctl enable ospfd
-#systemctl restart ospfd
+mkdir -p /etc/gobgp
+
+# config files will be copied via other ansible tasks
+
+
 touch /etc/quagga/vtysh.conf
 
-cp /vagrant/config/zebra.conf /etc/quagga
-systemctl enable zebra
-systemctl restart zebra
+# disable reverse path filtering, so e.g. a host can reply to ping packets for
+# destination address A it receives on an interface bound to address != A
+#
+# this setting usually is disabled per interface, we use all and default
+# to disable for all interfaces. See this email for how 'all' and 'default'
+# and 'rp_filter' work together: https://marc.info/?l=linux-kernel&m=123606366021995&w=2
+echo "0" > /proc/sys/net/ipv4/conf/all/rp_filter
+echo "0" > /proc/sys/net/ipv4/conf/default/ip_filter
+echo "0" > /proc/sys/net/ipv4/conf/enp0s8/rp_filter
+echo "0" > /proc/sys/net/ipv4/conf/enp0s9/rp_filter
+echo "net.ipv4.conf.default.rp_filter = 0" >> /etc/sysctl.conf
+echo "net.ipv4.conf.all.rp_filter = 0" >> /etc/sysctl.conf
+echo "net.ipv4.conf.enp0s8.rp_filter = 0" >> /etc/sysctl.conf
+echo "net.ipv4.conf.enp0s9.rp_filter = 0" >> /etc/sysctl.conf
 
+# enable ip forwarding, so packets can be passed to different interfaces
 echo "1" > /proc/sys/net/ipv4/ip_forward
+echo "net.ipv4.ip_forward = 1" >> /etc/sysctl.conf
 
 # Allocate 1024 hugepages of 2 MB
 # Change can be validated by executing 'cat /proc/meminfo | grep Huge'
 echo 1024 > /sys/kernel/mm/hugepages/hugepages-2048kB/nr_hugepages
 
 # Allocate 1024 hugepages of 2 MB at startup
-echo "net.ipv4.ip_forward = 1" >> /etc/sysctl.conf
 echo "vm.nr_hugepages = 1024" >> /etc/sysctl.conf
 
 # Set /mnt/huge
