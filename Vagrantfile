@@ -26,7 +26,6 @@ Vagrant.configure(2) do |config|
       "client" => ["cli-1",],
       "og" => ["og-1", "og-3",],
       "network:children" => ["leaf","spine","edge",]
-      "network:children" => ["spine","edge",]
     }
   end
 
@@ -74,7 +73,6 @@ Vagrant.configure(2) do |config|
 		       virtualbox__intnet: 's01cli',
 		       ip: '169.254.1.11', auto_config: false
     spine01.vm.provider 'virtualbox' do |vb|
-      vb.gui = true
       vb.customize ['modifyvm', :id, '--nicpromisc2', 'allow-all']
       vb.customize ['modifyvm', :id, '--nicpromisc3', 'allow-all']
       vb.customize ['modifyvm', :id, '--nicpromisc4', 'allow-all']
