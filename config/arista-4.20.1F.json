@@ -7,7 +7,7 @@
       "providers": [
         {
           "name": "virtualbox",
-          "url": "file:///Users/awang200/Work/GHE/awang200/occam/og/vEOS-lab-4.20.1F-virtualbox.box"
+          "url": "file:////mnt/gtm/arista-lab-vagrant/config/vEOS-lab-4.20.1F-virtualbox.box"
         }
       ]
     }

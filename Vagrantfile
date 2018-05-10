@@ -29,6 +29,31 @@ Vagrant.configure(2) do |config|
     }
   end
 
+  # for spine and leaf devices we only create the appropriate number of
+  # interfaces, they will be configured via ansible/site.yml
+
+  # each of the 2 spines has a direct port connecting to each of the 4 leaves,
+  # these connections use prefix 10.0.255.x (split into multiple /30 subnets)
+  #
+  # for spine-{1,2} device, the subnet we are setting to connect to the client is
+  # 10.0.25{1,2}.0/24 (see ansible/host_vars/spine-{1,2}.yml, under "interfaces",
+  # the interface with alias "uplink-cli-{1,2}).
+  #
+  # for leaf-{1,3} device, the subnet we are setting to connect to the og-{1,3}
+  # is the VLAN {101,102} with subnets 10.0.10{1,2}.0/24 (see ansible/host_vars/leaf-{1,3}.yml)
+  #
+  # we are using subnet 192.168.0.0/16 for anycasting. Each of the og-{1,3} binds
+  # to 192.168.0.{2,4} and they advertise route 192.168.0.0/16 via BGP to their peers
+  # (leaf-{1,3}).
+  #
+  # this setup means:
+  #   - client devices must set as default gateway to route 192.168.0.0/16 the spine
+  #     devices they're connected to (so for cli-1: "ip route add 192.168.0.0/16 via 10.0.251.2 dev enp0s8")
+  #   - og servers must set the leaf devices they are connected to as default gateways for
+  #     any subnets they want to reach, e.g., spine (10.0.255.0/24) and client networks
+  #     (10.0.251.0/24).
+  #   - og servers must have reverse path filtering disabled, ip forwarding enabled.
+
   config.vm.define 'spine-1' do |spine01|
     spine01.vm.box = default_box
     spine01.vm.boot_timeout = 600
@@ -54,7 +79,7 @@ Vagrant.configure(2) do |config|
       vb.customize ['modifyvm', :id, '--nicpromisc5', 'allow-all']
       vb.customize ['modifyvm', :id, '--nicpromisc6', 'allow-all']
     end
-  config.vbguest.auto_update = false
+    config.vbguest.auto_update = false
   end
 
   config.vm.define 'spine-2' do |spine02|
@@ -181,6 +206,10 @@ Vagrant.configure(2) do |config|
     if path_exists?($mgpath)
       cli1.vm.synced_folder $mgpath, "/MoonGen", disabled: false
     end
+    # interface 1 seems to map to enp0s3 (the one interface the guest uses to
+    # talk to the host), additional interfaces bind to enp0s(6 + interface number)
+    # so interface 2 would be bound to 10.0.251.3 below and mapped to enp0s8,
+    # interface 3 would be bound to 10.0.252.3 below and mapped to enp0s9
     cli1.vm.network 'private_network',
                        virtualbox__intnet: 's01cli',
                        ip: '10.0.251.3'
@@ -255,5 +284,4 @@ Vagrant.configure(2) do |config|
     og3.vm.provision 'shell', privileged: true, path: 'og-setup.sh', args: [og3_network, og3_host, og3_asn]
     config.vbguest.auto_update = false
   end
-
 end
