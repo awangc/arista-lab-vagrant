@@ -26,6 +26,7 @@ Vagrant.configure(2) do |config|
       "client" => ["cli-1",],
       "og" => ["og-1", "og-3",],
       "network:children" => ["leaf","spine","edge",]
+      "network:children" => ["spine","edge",]
     }
   end
 
@@ -73,6 +74,7 @@ Vagrant.configure(2) do |config|
 		       virtualbox__intnet: 's01cli',
 		       ip: '169.254.1.11', auto_config: false
     spine01.vm.provider 'virtualbox' do |vb|
+      vb.gui = true
       vb.customize ['modifyvm', :id, '--nicpromisc2', 'allow-all']
       vb.customize ['modifyvm', :id, '--nicpromisc3', 'allow-all']
       vb.customize ['modifyvm', :id, '--nicpromisc4', 'allow-all']
@@ -210,6 +212,7 @@ Vagrant.configure(2) do |config|
     # talk to the host), additional interfaces bind to enp0s(6 + interface number)
     # so interface 2 would be bound to 10.0.251.3 below and mapped to enp0s8,
     # interface 3 would be bound to 10.0.252.3 below and mapped to enp0s9
+    # currently cli-1 is connected to both spine-1 and spine-2
     cli1.vm.network 'private_network',
                        virtualbox__intnet: 's01cli',
                        ip: '10.0.251.3'

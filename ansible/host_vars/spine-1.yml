@@ -20,22 +20,10 @@ bgp_fabric:
 
 interfaces:
   Ethernet1:
-    alias: downlink-leaf-1
-    port_state: no switchport
-    address: 10.0.255.1/30
-  Ethernet2:
-    alias: downlink-leaf-2
-    port_state: no switchport
-    address: 10.0.255.9/30
-  Ethernet3:
-    alias: downlink-leaf-3
-    port_state: no switchport
-    address: 10.0.255.17/30
-  Ethernet4:
-    alias: downlink-leaf-4
+    alias: downlink-og-1
     port_state: no switchport
     address: 10.0.255.25/30
-  Ethernet5:
+  Ethernet2:
     alias: uplink-cli-1
     port_state: no switchport
     address: 10.0.251.2/24

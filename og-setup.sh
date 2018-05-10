@@ -39,7 +39,6 @@ mkdir -p /etc/gobgp
 
 # config files will be copied via other ansible tasks
 
-
 touch /etc/quagga/vtysh.conf
 
 # disable reverse path filtering, so e.g. a host can reply to ping packets for
