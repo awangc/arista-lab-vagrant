@@ -1,0 +1,10 @@
+# from ansible/roles/og/templates/gobgpd.conf.j2
+global:
+  config:
+    as: {{ bgp_fabric.asn }}
+    router-id: {{ og_network }}.{{ og_host }}
+    
+neighbors:
+  - config:
+      neighbor-address: {{ bgp_fabric.neighbor.address }}
+      peer-as: {{ bgp_fabric.neighbor.remote_as }}

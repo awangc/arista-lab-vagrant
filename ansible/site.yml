@@ -16,3 +16,15 @@
     - interfaces
     - routing
     - ntp
+
+- hosts: og
+
+  connection: local
+  gather_facts: False
+  vars:
+    cli:
+      username: vagrant
+      password: vagrant
+
+  roles:
+    - og
