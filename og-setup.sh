@@ -48,7 +48,7 @@ touch /etc/quagga/vtysh.conf
 # to disable for all interfaces. See this email for how 'all' and 'default'
 # and 'rp_filter' work together: https://marc.info/?l=linux-kernel&m=123606366021995&w=2
 echo "0" > /proc/sys/net/ipv4/conf/all/rp_filter
-echo "0" > /proc/sys/net/ipv4/conf/default/ip_filter
+echo "0" > /proc/sys/net/ipv4/conf/default/rp_filter
 echo "0" > /proc/sys/net/ipv4/conf/enp0s8/rp_filter
 echo "0" > /proc/sys/net/ipv4/conf/enp0s9/rp_filter
 echo "net.ipv4.conf.default.rp_filter = 0" >> /etc/sysctl.conf
