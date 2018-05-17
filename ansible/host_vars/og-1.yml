@@ -6,7 +6,7 @@ og_host: '2'
 
 bgp_fabric:
   asn: 65001 # matches leaf-1
-  router_id: "{{ network }}.{{ host }}"
+  router_id: "{{ og_network }}.{{ og_host }}"
   neighbor:
     address: 10.0.101.252 
     remote_as: 65001  # address/as of leaf-1 pipv4/as

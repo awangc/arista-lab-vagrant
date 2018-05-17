@@ -257,7 +257,6 @@ Vagrant.configure(2) do |config|
       vb.customize ['modifyvm', :id, '--nicpromisc3', 'allow-all']
     end
     og1.vm.provision 'shell', privileged: true, path: 'og-setup.sh', args: [og1_network, og1_host, og1_asn]
-									    
     config.vbguest.auto_update = false
   end
 
