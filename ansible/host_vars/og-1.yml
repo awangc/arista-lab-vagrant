@@ -1,16 +1,13 @@
 ---
 # host_vars/og-1.yml
 
-og_network: '10.0.101' # to communicate to leaf devices
-og_host: '2'
-
-bgp_fabric:
-  asn: 65001 # matches leaf-1
-  router_id: "{{ network }}.{{ host }}"
-  neighbor:
-    address: 10.0.101.252 
-    remote_as: 65001  # address/as of leaf-1 pipv4/as
-  anycast_range: 192.168.0.0/16 # CIDR used for anycast IP
+common_network: '10.0.153' # to communicate to spine devices
+og_host: '12'
+default_gateway_client: '10.0.153.22' # spine IP address connected to og
+client_network: 
+  - '10.0.151.0/24'
+  - '10.0.251.0/24'
+anycast_range: 192.168.0.0/16 # CIDR used for anycast IP
 
 og_interfaces: # see comments in Vagrantfile, regarding naming of interfaces for private network interfaces
   - enp0s8

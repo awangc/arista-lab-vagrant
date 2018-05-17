@@ -1,29 +1,36 @@
 ---
 
-loopback: 10.255.0.1/32
+loopback: 10.255.0.2/32
 
 bgp_fabric:
-  asn: 65000
-  router_id: 10.255.0.1
+  asn: 65002
+  router_id: 10.255.0.2
   neighbor:
-    - {address: 10.0.255.2, remote_as: 65001}
-    - {address: 10.0.255.10, remote_as: 65002}
-    - {address: 10.0.255.18, remote_as: 65003}
-    - {address: 10.0.255.26, remote_as: 65004}
+    - {address: 10.0.252.3, remote_as: 65003}
   networks:
-    - 10.255.0.1/32
-    - 10.0.255.0/30
-    - 10.0.255.8/30
-    - 10.0.255.16/30
-    - 10.0.255.24/30
-    - 10.0.251.0/24
+    - 10.255.0.2/32
+    - 10.0.151.0/24
+    - 10.0.252.0/24
+    - 10.0.153.0/24
 
 interfaces:
   Ethernet1:
-    alias: downlink-og-1
-    port_state: no switchport
-    address: 10.0.255.25/30
-  Ethernet2:
     alias: uplink-cli-1
     port_state: no switchport
-    address: 10.0.251.2/24
+    address: 10.0.151.2/24
+  Ethernet2:
+    alias: cross-spine-2
+    port_state: no switchport
+    address: 10.0.252.2/24
+  Ethernet3:
+    alias: downlink-bgp-1
+    port_state: no switchport
+    address: 10.0.153.21/24
+  Ethernet4:
+    alias: downlink-og-1
+    port_state: no switchport
+    address: 10.0.153.22/24
+  Ethernet5:
+    alias: downlink-app-1
+    port_state: no switchport
+    address: 10.0.153.23/24
