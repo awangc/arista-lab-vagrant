@@ -111,6 +111,7 @@ Vagrant.configure(2) do |config|
   end
 
   config.vm.define 'leaf-1' do |leaf01|
+    leaf01.vm.boot_timeout = 600
     leaf01.vm.box = default_box
     leaf01.vm.network 'private_network',
                        virtualbox__intnet: 's01l01',
@@ -135,6 +136,7 @@ Vagrant.configure(2) do |config|
 
   config.vm.define 'leaf-2' do |leaf02|
     leaf02.vm.box = default_box
+    leaf02.vm.boot_timeout = 600
     leaf02.vm.network 'private_network',
                        virtualbox__intnet: 's01l02',
                        ip: '169.254.1.11', auto_config: false
@@ -154,6 +156,7 @@ Vagrant.configure(2) do |config|
   
   config.vm.define 'leaf-3' do |leaf03|
     leaf03.vm.box = default_box
+    leaf03.vm.boot_timeout = 600
     leaf03.vm.network 'private_network',
                        virtualbox__intnet: 's01l03',
                        ip: '169.254.1.11', auto_config: false
@@ -196,9 +199,10 @@ Vagrant.configure(2) do |config|
   end
 
   config.vm.define 'cli-1' do |cli1|
+    cli1.vm.boot_timeout = 600
     cli1.vm.box = server_box
+    cli1.vm.box_version = '20180504.0.0'
     cli1.vm.hostname = 'cli-1'
-    cli1.disksize.size = "30GB"
     cli1.vm.synced_folder ".", "/vagrant", disabled: false
     if path_exists?($nbpath)
       cli1.vm.synced_folder $nbpath, "/NetBricks", disabled: false
