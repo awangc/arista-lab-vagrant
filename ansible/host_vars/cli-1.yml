@@ -1,0 +1,5 @@
+---
+
+anycast_subnet: '192.168.0.0/16'
+anycast_default_gateway: '10.0.151.2' # spine-1 client network address
+
