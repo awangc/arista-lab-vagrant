@@ -1,0 +1,20 @@
+---
+- hosts: cli
+  gather_facts: False
+  become: true
+  tasks:
+  - name: install python 2
+    raw: test -e /usr/bin/python || (apt -y update && apt install -y python-minimal)
+
+- hosts: cli
+  become: true
+  become_user: root
+  vars:
+    cli:
+      username: vagrant
+      password: vagrant
+
+  tasks:
+
+  - name: routing for anycast subnet uses spine as default gateway
+    shell: ip route add {{ anycast_subnet }} via {{ anycast_default_gateway }} dev enp0s8    
