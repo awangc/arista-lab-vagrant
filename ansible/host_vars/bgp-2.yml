@@ -1,0 +1,22 @@
+---
+# host_vars/bgp-2.yml
+
+common_network: '10.0.253' # to communicate to spine devices
+bgp_host: '11'
+
+bgp_fabric:
+  asn: 65003 # matches spine-2
+  router_id: "{{ common_network }}.{{ bgp_host }}"
+  neighbor:
+    address: 10.0.253.21 # spine-2 ip address of connected port
+    remote_as: 65003  # matches spine-2
+  anycast_range: 192.168.0.0/16 # CIDR used for anycast IP
+
+client_network:
+  - '10.0.151.0/24'
+  - '10.0.251.0/24'
+
+og_interfaces: # see comments in Vagrantfile, regarding naming of interfaces for private network interfaces
+  - enp0s8
+  - enp0s9
+
