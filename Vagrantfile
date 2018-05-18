@@ -2,6 +2,8 @@
 # vi: set ft=ruby :
 
 Vagrant::DEFAULT_SERVER_URL.replace('https://vagrantcloud.com')
+VAGRANTFILE_API_VERSION = "2"
+
 default_box = 'vEOS-lab-4.20.1F'
 server_box = 'ubuntu/xenial64'
 def path_exists?(path)
@@ -16,22 +18,21 @@ $mgpath = ENV.fetch("MGPATH", "../MoonGen")
 $dpdk_driver = ENV.fetch("DPDK_DRIVER", "uio_pci_generic")
 $dpdk_devices = ENV.fetch("DPDK_DEVICES", "0000:00:08.0 0000:00:09.0")
 
-dc1_network = '10.0.101'
-dc2_network = '10.0.102'
-dc1_asn = '65001'
-dc2_asn = '65002'
-ext1_network = '10.0.251'
+dc1_network = '10.0.153'
+dc2_network = '10.0.253'
+dc1_asn = '65002'
+dc2_asn = '65003'
+ext1_network = '10.0.151'
 ext2_network = '10.0.252'
 dc1_anycast_subnet = '192.168.1'
 dc2_anycast_subnet = '192.168.2'
 
-spine_host = '2'
-bgp_host = '3'
-og_host = '4'
-client_host = '5'
-app_host = '6'
+bgp_host = '11'
+og_host = '12'
+client_host = '3'
+app_host = '13'
  
-Vagrant.configure(2) do |config|
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.provision "ansible" do |ansible|
     ansible.playbook = "./helper_scripts/empty_playbook.yml"
     ansible.groups = {
@@ -217,18 +218,61 @@ Vagrant.configure(2) do |config|
     og1_network = dc1_network
     og1_host = og_host
     og1_asn = dc1_asn
+    # Create a private network, which allows host-only access to the machine using a
+    # specific IP. This option is needed because DPDK takes over the NIC.
+    og1.vm.network "private_network", ip: "10.1.2.2", mac: "BADCAFEBEEF1", nic_type: "virtio"
+    og1.vm.network "private_network", ip: "10.1.2.3", mac: "BADCAFEBEEF2", nic_type: "virtio"
     og1.vm.network 'private_network',
                        virtualbox__intnet: 's01og1',
                        ip: og1_network + '.' + og1_host
     og1.vm.network 'private_network',
                        virtualbox__intnet: 'bgp1og1',
                        ip: dc1_anycast_subnet + '.' + og1_host
+    og1.vm.provision 'shell', privileged: true, path: 'og-setup.sh'
+
+    # Pull and run (then remove) our image in order to do the devbind
+    og1 .vm.provision "docker" do |d|
+      d.pull_images "#{$dproject}/#{$dimage}:#{$dtag}"
+      d.run "#{$dproject}/#{$dimage}:#{$dtag}",
+          auto_assign_name: false,
+          args: %W(--name=#{$dimage}
+                   --rm
+                   --privileged
+                   --pid=host
+                   --network=host
+                   -v /lib/modules:/lib/modules
+                   -v /usr/src:/usr/src
+                   -v /sys/bus/pci/drivers:/sys/bus/pci/drivers
+                   -v /sys/kernel/mm/hugepages:/sys/kernel/mm/hugepages
+                   -v /sys/devices/system/node:/sys/devices/system/node
+                   -v /sbin/modinfo:/sbin/modinfo
+                   -v /bin/kmod:/bin/kmod
+                   -v /sbin/lsmod:/sbin/lsmod
+                   -v /dev:/dev
+                   -v /mnt/huge:/mnt/huge
+                   -v /var/run:/var/run).join(" "),
+          restart: "no",
+          daemonize: true,
+          cmd: "/bin/bash -c '/dpdk/usertools/dpdk-devbind.py --force -b #{$dpdk_driver} #{$dpdk_devices}'"
+    end
+
     og1.vm.provider 'virtualbox' do |vb|
       vb.name = 'og-1'
+      vb.memory = 4096
+      vb.cpus = 4
       vb.customize ['modifyvm', :id, '--nicpromisc2', 'allow-all']
       vb.customize ['modifyvm', :id, '--nicpromisc3', 'allow-all']
+      vb.customize ['modifyvm', :id, '--nicpromisc4', 'allow-all']
+      vb.customize ['modifyvm', :id, '--nicpromisc5', 'allow-all']
+      # Configure VirtualBox to enable passthrough of SSE 4.1 and SSE 4.2 instructions,
+      # according to this: https://www.virtualbox.org/manual/ch09.html#sse412passthrough
+      # This step is fundamental otherwise DPDK won't build. It is possible to verify in
+      # the guest OS that these changes took effect by running `cat /proc/cpuinfo` and
+      # checking that `sse4_1` and `sse4_2` are listed among the CPU flags.
+      vb.customize ["setextradata", :id, "VBoxInternal/CPUM/SSE4.1", "1"]
+      vb.customize ["setextradata", :id, "VBoxInternal/CPUM/SSE4.2", "1"]
     end
-    og1.vm.provision 'shell', privileged: true, path: 'og-setup.sh', args: [og1_network, og1_host, og1_asn]
+
     config.vbguest.auto_update = false
   end
 
@@ -239,7 +283,7 @@ Vagrant.configure(2) do |config|
     og2.disksize.size = "30GB"
     og2.vm.synced_folder ".", "/vagrant", disabled: false
     if path_exists?($nbpath)
-      og1.vm.synced_folder $nbpath, "/NetBricks", disabled: false
+      og2.vm.synced_folder $nbpath, "/NetBricks", disabled: false
     end
     if path_exists?($mgpath)
       og2.vm.synced_folder $mgpath, "/MoonGen", disabled: false
@@ -247,20 +291,64 @@ Vagrant.configure(2) do |config|
     og2_network = dc2_network
     og2_host = og_host
     og2_asn = dc2_asn
+    # Create a private network, which allows host-only access to the machine using a
+    # specific IP. This option is needed because DPDK takes over the NIC.
+    og2.vm.network "private_network", ip: "10.1.2.4", mac: "BADCAFEBEEF3", nic_type: "virtio"
+    og2.vm.network "private_network", ip: "10.1.2.5", mac: "BADCAFEBEEF4", nic_type: "virtio"
     og2.vm.network 'private_network',
                        virtualbox__intnet: 's02og2',
                        ip: og2_network + '.' + og2_host
     og2.vm.network 'private_network',
                        virtualbox__intnet: 'bgp2og2',
                        ip: dc2_anycast_subnet + '.' + og2_host
+    og2.vm.provision 'shell', privileged: true, path: 'og-setup.sh'
+
+    # Pull and run (then remove) our image in order to do the devbind
+    og2 .vm.provision "docker" do |d|
+      d.pull_images "#{$dproject}/#{$dimage}:#{$dtag}"
+      d.run "#{$dproject}/#{$dimage}:#{$dtag}",
+          auto_assign_name: false,
+          args: %W(--name=#{$dimage}
+                   --rm
+                   --privileged
+                   --pid=host
+                   --network=host
+                   -v /lib/modules:/lib/modules
+                   -v /usr/src:/usr/src
+                   -v /sys/bus/pci/drivers:/sys/bus/pci/drivers
+                   -v /sys/kernel/mm/hugepages:/sys/kernel/mm/hugepages
+                   -v /sys/devices/system/node:/sys/devices/system/node
+                   -v /sbin/modinfo:/sbin/modinfo
+                   -v /bin/kmod:/bin/kmod
+                   -v /sbin/lsmod:/sbin/lsmod
+                   -v /dev:/dev
+                   -v /mnt/huge:/mnt/huge
+                   -v /var/run:/var/run).join(" "),
+          restart: "no",
+          daemonize: true,
+          cmd: "/bin/bash -c '/dpdk/usertools/dpdk-devbind.py --force -b #{$dpdk_driver} #{$dpdk_devices}'"
+    end
+
     og2.vm.provider 'virtualbox' do |vb|
       vb.name = 'og-2'
+      vb.memory = 4096
+      vb.cpus = 4
       vb.customize ['modifyvm', :id, '--nicpromisc2', 'allow-all']
       vb.customize ['modifyvm', :id, '--nicpromisc3', 'allow-all']
+      vb.customize ['modifyvm', :id, '--nicpromisc4', 'allow-all']
+      vb.customize ['modifyvm', :id, '--nicpromisc5', 'allow-all']
+      # Configure VirtualBox to enable passthrough of SSE 4.1 and SSE 4.2 instructions,
+      # according to this: https://www.virtualbox.org/manual/ch09.html#sse412passthrough
+      # This step is fundamental otherwise DPDK won't build. It is possible to verify in
+      # the guest OS that these changes took effect by running `cat /proc/cpuinfo` and
+      # checking that `sse4_1` and `sse4_2` are listed among the CPU flags.
+      vb.customize ["setextradata", :id, "VBoxInternal/CPUM/SSE4.1", "1"]
+      vb.customize ["setextradata", :id, "VBoxInternal/CPUM/SSE4.2", "1"]
     end
-    og2.vm.provision 'shell', privileged: true, path: 'og-setup.sh', args: [og2_network, og2_host, og2_asn]
-    config.vbguest.auto_update 
+
+    config.vbguest.auto_update = false
   end
+
 
   config.vm.define 'app-1' do |app1|
     app1.vm.box = server_box
