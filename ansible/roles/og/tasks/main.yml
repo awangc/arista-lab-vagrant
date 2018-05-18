@@ -35,10 +35,16 @@
 - name: add default gateway for routes to client subnet
   become: yes
   become_user: root
-  shell: ip route add {{ bgp_fabric.anycast_range }} via {{ bgp_fabric.neighbor.address }} dev enp0s8
+  shell: ip route add 10.0.251.0/24 via {{ bgp_fabric.neighbor.address }} dev enp0s8
 
 - name: add default gateway for routes to spine devices
   become: yes
   become_user: root
   shell: ip route add 10.0.255.0/24 via {{ bgp_fabric.neighbor.address }} dev enp0s8
+
+- name: advertise routes to anycasted range
+  become: yes
+  become_user: root
+  shell:  gobgp global rib add -a ipv4 {{ bgp_fabric.anycast.range }} med {{ bgp_fabric.anycast.med }} 
+
 
