@@ -181,7 +181,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       vb.customize ['modifyvm', :id, '--nicpromisc2', 'allow-all']
       vb.customize ['modifyvm', :id, '--nicpromisc3', 'allow-all']
     end
-
+    bgp1.vm.provision 'shell', privileged: true, path: 'bgp-setup.sh', args: [dc1_network, bgp_host, dc1_asn]
     config.vbguest.auto_update = false
   end
 
@@ -200,6 +200,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       vb.customize ['modifyvm', :id, '--nicpromisc2', 'allow-all']
       vb.customize ['modifyvm', :id, '--nicpromisc3', 'allow-all']
     end
+    bgp2.vm.provision 'shell', privileged: true, path: 'bgp-setup.sh', args: [dc2_network, bgp_host, dc2_asn]
     config.vbguest.auto_update = false
   end
 
