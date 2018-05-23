@@ -49,6 +49,6 @@
 - name: advertise routes to anycasted range
   become: yes
   become_user: root
-  shell:  gobgp global rib add -a ipv4 {{ item.range }} med {{ item.med }} 
+  shell:  gobgp global rib add -a ipv4 {{ item.range }} nexthop {{ bgp_fabric.anycast_nexthop }} med {{ item.med }} 
   with_items: "{{ bgp_fabric.anycast_ranges }}"
  
