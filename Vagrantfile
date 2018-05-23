@@ -301,7 +301,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     if path_exists?($mgpath)
       og2.vm.synced_folder $mgpath, "/MoonGen", disabled: false
     end
-    og2_network = dc2_network
+    og2_network = dc2_og_network
     og2_host = og_host
     og2_asn = dc2_asn
     # Create a private network, which allows host-only access to the machine using a
@@ -369,7 +369,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     app1.vm.synced_folder ".", "/vagrant", disabled: false
     app1.vm.network 'private_network',
                        virtualbox__intnet: 's01app1',
-                       ip: dc1_network + '.' + app_host
+                       ip: dc1_app_network + '.' + app_host
     app1.vm.provider 'virtualbox' do |vb|
       vb.name = 'app-1'
       vb.customize ['modifyvm', :id, '--nicpromisc2', 'allow-all']
@@ -384,7 +384,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     app2.vm.synced_folder ".", "/vagrant", disabled: false
     app2.vm.network 'private_network',
                        virtualbox__intnet: 's02app2',
-                       ip: dc2_network + '.' + app_host
+                       ip: dc2_app_network + '.' + app_host
     app2.vm.provider 'virtualbox' do |vb|
       vb.name = 'app-2'
       vb.customize ['modifyvm', :id, '--nicpromisc2', 'allow-all']
