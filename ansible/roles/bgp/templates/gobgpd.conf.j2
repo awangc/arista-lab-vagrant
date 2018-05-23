@@ -2,7 +2,7 @@
 global:
   config:
     as: {{ bgp_fabric.asn }}
-    router-id: {{ og_network }}.{{ og_host }}
+    router-id: {{ bgp_fabric.router_id }}
     
 neighbors:
   - config:

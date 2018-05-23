@@ -1,37 +1,44 @@
 ---
-
-loopback: 10.255.0.3/32
+# host_vars/spine-2.yml
+#
+# spine_host is single digit and determined in the host var, as it
+# must be unique across dc networks
+spine_host: 3
+loopback: "{{ spine_loopback_prefix }}.{{ dcs.dc2.spine_host }}/32"
 
 bgp_fabric:
-  asn: 65003
-  router_id: 10.255.0.3
+  asn: "{{ dcs.dc2.asn }}"
+  router_id: "{{ spine_network_prefix }}.{{ dcs.dc2.spine_host }}"
   neighbor:
-    - {address: 10.0.252.2, remote_as: 65002}
+    - {address: "{{ spine_network_prefix }}.{{ dcs.dc1.spine_host }}", remote_as: "{{ dcs.dc1.asn }}" } # spine-1.yml
+    - {address: "{{ dcs.dc2.bgp_network_prefix }}.{{ bgp_host }}", remote_as: "{{ dcs.dc2.asn }}"}
   networks:
-    - 10.255.0.3/32
-    - 10.0.251.0/24
-    - 10.0.252.0/24
-    - 10.0.253.0/24
+    - "{{ spine_loopback_prefix }}.{{ dcs.dc2.spine_host }}/32"
+    - "{{ dcs.dc2.client_network }}"
+    - "{{ spine_network }}"
+    - "{{ dcs.dc2.bgp_network }}"
+    - "{{ dcs.dc2.og_network }}"
+    - "{{ dcs.dc2.app_network }}"
 
 interfaces:
   Ethernet1:
     alias: uplink-cli-2
     port_state: no switchport
-    address: 10.0.251.2/24
+    address: "{{ dcs.dc2.client_network_prefix }}.{{ dcs.dc2.spine_host }}/24"
   Ethernet2:
     alias: cross-spine-1
     port_state: no switchport
-    address: 10.0.252.3/24
+    address: "{{ spine_network_prefix }}.{{ dcs.dc2.spine_host }}/24"
   Ethernet3:
     alias: downlink-bgp-2
     port_state: no switchport
-    address: 10.0.253.21/24
+    address: "{{ dcs.dc2.bgp_network_prefix }}.{{ dcs.dc2.spine_host }}/24"
   Ethernet4:
     alias: downlink-og-2
     port_state: no switchport
-    address: 10.0.253.22/24
+    address: "{{ dcs.dc2.og_network_prefix }}.{{ dcs.dc2.spine_host }}/24"
   Ethernet5:
     alias: downlink-app-2
     port_state: no switchport
-    address: 10.0.253.23/24
+    address: "{{ dcs.dc2.app_network_prefix }}.{{ dcs.dc2.spine_host }}/24"
 

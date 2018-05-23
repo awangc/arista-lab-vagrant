@@ -1,0 +1,15 @@
+---
+# group_vars/bgp.yml
+#
+# These are also defined in the Vagrantfile
+# Ideally we have only one place to define these...
+# except bgp subnets, add them in the bpg host vars
+spine_subnets:
+ - '10.0.151.0/24'
+ - '10.0.154.0/24'
+ - '10.0.155.0/24'
+ - '10.0.251.0/24'
+ - '10.0.252.0/24'
+ - '10.0.254.0/24'
+ - '10.0.255.0/24'
+

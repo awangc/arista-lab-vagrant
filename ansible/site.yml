@@ -11,7 +11,6 @@
       password: vagrant
 
   roles:
-    - leafgroups
     - hostname
     - interfaces
     - routing

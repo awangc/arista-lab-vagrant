@@ -7,10 +7,51 @@ timezone: UTC
 
 domain_name: lab.local
 
-clag_pairs:
-  leafgroup1:
-    - leaf-1
-    - leaf-2
-  leafgroup2:
-    - leaf-3
-    - leaf-4
+# ip address of host is formed by "dc_{bgp,og,app,cli}_network_prefix"."{bgp,og,app,cli}.host" (common_network defined in dc{1.2}.yml)
+# defined also in Vagrantfile
+bgp_host: '11'
+og_host: '12'
+app_host: '13'
+
+# ip address of client is formed by "dc_client_network_prefix"."client_host" (see dc{1,2}.yml)
+client_host: '14'
+
+# it's in "all.yml" because it must be unique across DCs and must be accessible to bgp nodes
+spine_network_prefix: '10.0.252'
+spine_network: "{{ spine_network_prefix }}.0/24"
+# subnet for the loopback interface for the spine devices
+spine_loopback_prefix: '10.255.0'
+
+# app_anycast_range
+app_anycast_prefix: "192.168.0"
+app_anycast: "{{ app_anycast_prefix }}.0/24"
+
+dcs:
+  dc2:
+    bgp_network_prefix: '10.0.253'
+    bgp_network: "10.0.253.0/24"
+    og_network_prefix: '10.0.254'
+    og_network: "10.0.254.0/24"
+    app_network_prefix: '10.0.255'
+    app_network: "10.0.255.0/24"
+    client_network_prefix: '10.0.251'
+    client_network: "10.0.251.0/24"
+    asn: 65003
+    anycast_prefix: '192.168.2'
+    anycast: "192.168.2.0/24"
+    med: 20
+    spine_host: '3'
+  dc1:
+    bgp_network_prefix: '10.0.153'
+    bgp_network: "10.0.153.0/24"
+    og_network_prefix: '10.0.154'
+    og_network: "10.0.154.0/24"
+    app_network_prefix: '10.0.155'
+    app_network: "10.0.155.0/24"
+    client_network_prefix: '10.0.151'
+    client_network: "10.0.151.0/24"
+    asn: 65002
+    anycast_prefix: '192.168.1'
+    anycast: "192.168.1.0/24"
+    med: 10
+    spine_host: '10'

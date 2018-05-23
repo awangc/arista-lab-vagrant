@@ -18,29 +18,41 @@ $mgpath = ENV.fetch("MGPATH", "../MoonGen")
 $dpdk_driver = ENV.fetch("DPDK_DRIVER", "uio_pci_generic")
 $dpdk_devices = ENV.fetch("DPDK_DEVICES", "0000:00:08.0 0000:00:09.0")
 
-dc1_network = '10.0.153'
-dc2_network = '10.0.253'
+# also defined in ansible/group_vars/bgp.yml -- ideally we'd only have one file with these
+# need to find out how to share config across ansible and Vagrant
+dc1_bgp_network = '10.0.153'
+dc1_og_network = '10.0.153'
+dc1_app_network = '10.0.153'
+dc1_cli_network = '10.0.151'
 dc1_asn = '65002'
+
+dc2_bgp_network = '10.0.253'
+dc2_og_network = '10.0.253'
+dc2_app_network = '10.0.253'
+dc2_cli_network = '10.0.251'
 dc2_asn = '65003'
-ext1_network = '10.0.151'
-ext2_network = '10.0.252'
+
 dc1_anycast_subnet = '192.168.1'
 dc2_anycast_subnet = '192.168.2'
 
 bgp_host = '11'
 og_host = '12'
-client_host = '3'
 app_host = '13'
- 
+client_host = '14'
+spine1_host = '2'
+spine2_host = '3'
+
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.provision "ansible" do |ansible|
     ansible.playbook = "./helper_scripts/empty_playbook.yml"
     ansible.groups = {
       "spine" => ["spine-1","spine-2",],
       "bgp" => ["bgp-1","bgp-2",],
-      "client" => ["cli-1","cli-2"],
+      "cli" => ["cli-1","cli-2"],
       "og" => ["og-1", "og-2",],
-      "network:children" => ["spine",]
+      "network:children" => ["spine",],
+      "dc1" => ["spine-1", "bgp-1", "og-1", "app-1"],
+      "dc2" => ["spine-2", "bgp-2", "og-2", "app-2"],
     }
   end
 
@@ -136,7 +148,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     # currently cli-1 is connected to spine-1 
     cli1.vm.network 'private_network',
                        virtualbox__intnet: 's01cli1',
-                       ip: ext1_network + '.' + client_host
+                       ip: dc1_cli_network + '.' + client_host
     cli1.vm.provider 'virtualbox' do |vb|
       vb.name = 'cli-1'
       vb.customize ['modifyvm', :id, '--nicpromisc2', 'allow-all']
@@ -157,7 +169,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     # currently cli-2 is connected to spine-2
     cli2.vm.network 'private_network',
                        virtualbox__intnet: 's02cli2',
-                       ip: ext2_network + '.' + client_host 
+                       ip: dc2_cli_network + '.' + client_host 
     cli2.vm.provider 'virtualbox' do |vb|
       vb.name = 'cli-2'
       vb.customize ['modifyvm', :id, '--nicpromisc2', 'allow-all']
@@ -172,7 +184,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     bgp1.vm.synced_folder ".", "/vagrant", disabled: false
     bgp1.vm.network 'private_network',
                        virtualbox__intnet: 's01bgp1',
-                       ip: dc1_network + '.' + bgp_host
+                       ip: dc1_bgp_network + '.' + bgp_host
     bgp1.vm.network 'private_network',
                        virtualbox__intnet: 'bgp1og1',
                        ip: dc1_anycast_subnet + '.' + bgp_host
@@ -181,7 +193,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       vb.customize ['modifyvm', :id, '--nicpromisc2', 'allow-all']
       vb.customize ['modifyvm', :id, '--nicpromisc3', 'allow-all']
     end
-    bgp1.vm.provision 'shell', privileged: true, path: 'bgp-setup.sh', args: [dc1_network, bgp_host, dc1_asn]
+    bgp1.vm.provision 'shell', privileged: true, path: 'bgp-setup.sh', args: [dc1_bgp_network, bgp_host, dc1_asn]
     config.vbguest.auto_update = false
   end
 
@@ -191,7 +203,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     bgp2.vm.synced_folder ".", "/vagrant", disabled: false
     bgp2.vm.network 'private_network',
                        virtualbox__intnet: 's02bgp2',
-                       ip: dc2_network + '.' + bgp_host
+                       ip: dc2_bgp_network + '.' + bgp_host
     bgp2.vm.network 'private_network',
                        virtualbox__intnet: 'bgp2og2',
                        ip: dc2_anycast_subnet + '.' + bgp_host
@@ -200,7 +212,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       vb.customize ['modifyvm', :id, '--nicpromisc2', 'allow-all']
       vb.customize ['modifyvm', :id, '--nicpromisc3', 'allow-all']
     end
-    bgp2.vm.provision 'shell', privileged: true, path: 'bgp-setup.sh', args: [dc2_network, bgp_host, dc2_asn]
+    bgp2.vm.provision 'shell', privileged: true, path: 'bgp-setup.sh', args: [dc2_bgp_network, bgp_host, dc2_asn]
     config.vbguest.auto_update = false
   end
 
@@ -216,7 +228,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     if path_exists?($mgpath)
       og1.vm.synced_folder $mgpath, "/MoonGen", disabled: false
     end
-    og1_network = dc1_network
+    og1_network = dc1_og_network
     og1_host = og_host
     og1_asn = dc1_asn
     # Create a private network, which allows host-only access to the machine using a

@@ -32,19 +32,23 @@
     enabled: yes
     state: started
 
-- name: add default gateway for routes to client subnet
+- name: add default gateway for routes to spine attached subnets, except bgp
   become: yes
   become_user: root
-  shell: ip route add 10.0.251.0/24 via {{ bgp_fabric.neighbor.address }} dev enp0s8
+  shell: ip route add {{ item }} via {{ bgp_fabric.neighbor.address }} dev enp0s8
+  with_items: "{{ spine_subnets }}"
+  ignore_errors: yes # if adding existing route it will error out
 
-- name: add default gateway for routes to spine devices
+- name: add default gateway for routes to other bgp subnets
   become: yes
   become_user: root
-  shell: ip route add 10.0.255.0/24 via {{ bgp_fabric.neighbor.address }} dev enp0s8
+  shell: ip route add {{ item }} via {{ bgp_fabric.neighbor.address }} dev enp0s8
+  with_items: "{{ bgp_subnets }}"
+  ignore_errors: yes 
 
 - name: advertise routes to anycasted range
   become: yes
   become_user: root
-  shell:  gobgp global rib add -a ipv4 {{ bgp_fabric.anycast.range }} med {{ bgp_fabric.anycast.med }} 
-
-
+  shell:  gobgp global rib add -a ipv4 {{ item.range }} med {{ item.med }} 
+  with_items: "{{ bgp_fabric.anycast_ranges }}"
+ 

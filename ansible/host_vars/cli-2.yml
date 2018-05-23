@@ -1,5 +1,10 @@
 ---
+# host_vars/cli-2.yml
 
-anycast_subnet: '192.168.0.0/16'
-anycast_default_gateway: '10.0.251.2' # spine-2 client network address
+anycast_subnets:
+  - "{{ app_anycast }}"
+  - "{{ dcs.dc1.anycast }}"
+  - "{{ dcs.dc2.anycast }}"
+
+anycast_default_gateway: "{{ dcs.dc2.client_network_prefix }}.{{ dcs.dc2.spine_host }}" # spine-1 client network address
 

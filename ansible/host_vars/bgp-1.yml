@@ -1,22 +1,23 @@
 ---
 # host_vars/bgp-1.yml
 
-common_network: '10.0.153' # to communicate to spine devices
-bgp_host: '11'
-
 bgp_fabric:
-  asn: 65002 # matches spine-1
-  router_id: "{{ common_network }}.{{ bgp_host }}"
+  asn: "{{ dcs.dc1.asn }}" # matches spine-1
+  router_id: "{{ dcs.dc1.bgp_network_prefix }}.{{ bgp_host }}"
   neighbor:
-    address: 10.0.153.21 # spine-1 ip address of connected port
-    remote_as: 65002  # matches spine-1
-  anycast_range: 192.168.0.0/16 # CIDR used for anycast IP
+    address: "'{{ spine_network_prefix }}.{{ dcs.dc1.spine_host }}'"  # spine-1 ip address of connected port
+           
+    remote_as: "{{ dcs.dc1.asn }}"  # matches spine-1
+  anycast_ranges: 
+    - range: "{{ app_anycast }}" # CIDR used for anycast IP
+      med: "{{ dcs.dc1.med }}"
+    - range: "{{ dcs.dc1.anycast }}"
+      med: "{{ dcs.dc1.med }}"
 
-client_network:
-  - '10.0.151.0/24'
-  - '10.0.251.0/24'
+bgp_subnets:
+  - "{{ dcs.dc2.bgp_network }}"
 
-og_interfaces: # see comments in Vagrantfile, regarding naming of interfaces for private network interfaces
+bgp_interfaces: # see comments in Vagrantfile, regarding naming of interfaces for private network interfaces
   - enp0s8
   - enp0s9
 

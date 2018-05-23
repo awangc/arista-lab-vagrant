@@ -1,0 +1,5 @@
+--- 
+# group_vars/dc2.yml
+#
+dc_val: 'dc2'
+
