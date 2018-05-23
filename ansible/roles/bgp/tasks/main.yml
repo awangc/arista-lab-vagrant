@@ -35,14 +35,14 @@
 - name: add default gateway for routes to spine attached subnets, except bgp
   become: yes
   become_user: root
-  shell: ip route add {{ item }} via {{ bgp_fabric.neighbor.address }} dev enp0s8
+  shell: ip route add {{ item }} via {{ bgp_fabric.neighbor.local_ip }} dev enp0s8
   with_items: "{{ spine_subnets }}"
   ignore_errors: yes # if adding existing route it will error out
 
 - name: add default gateway for routes to other bgp subnets
   become: yes
   become_user: root
-  shell: ip route add {{ item }} via {{ bgp_fabric.neighbor.address }} dev enp0s8
+  shell: ip route add {{ item }} via {{ bgp_fabric.neighbor.local_ip }} dev enp0s8
   with_items: "{{ bgp_subnets }}"
   ignore_errors: yes 
 

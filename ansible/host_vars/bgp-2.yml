@@ -5,8 +5,9 @@ bgp_fabric:
   asn: "{{ dcs.dc2.asn }}" # matches spine-2
   router_id: "{{ dcs.dc2.bgp_network_prefix }}.{{ bgp_host }}"
   neighbor:
-    address: "{{ spine_network_prefix }}.{{ dcs.dc2.spine_host }}" # spine-2 ip address of connected port
+    id: "{{ spine_network_prefix }}.{{ dcs.dc2.spine_host }}" # spine-2 ip address of connected port
     remote_as: "{{ dcs.dc2.asn }}"  # matches spine-2
+    local_ip: "{{ dcs.dc2.bgp_network_prefix }}.{{ dcs.dc2.spine_host }}"
   anycast_ranges:
     - range: "{{ app_anycast }}" # CIDR used for anycast IP
       med: "{{ dcs.dc2.med }}"
