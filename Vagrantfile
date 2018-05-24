@@ -21,19 +21,21 @@ $dpdk_devices = ENV.fetch("DPDK_DEVICES", "0000:00:08.0 0000:00:09.0")
 # also defined in ansible/group_vars/bgp.yml -- ideally we'd only have one file with these
 # need to find out how to share config across ansible and Vagrant
 dc1_bgp_network = '10.0.153'
-dc1_og_network = '10.0.153'
-dc1_app_network = '10.0.153'
+dc1_og_network = '10.0.154'
+dc1_app_network = '10.0.155'
 dc1_cli_network = '10.0.151'
 dc1_asn = '65002'
 
 dc2_bgp_network = '10.0.253'
-dc2_og_network = '10.0.253'
-dc2_app_network = '10.0.253'
+dc2_og_network = '10.0.254'
+dc2_app_network = '10.0.255'
 dc2_cli_network = '10.0.251'
 dc2_asn = '65003'
 
 dc1_anycast_subnet = '192.168.1'
 dc2_anycast_subnet = '192.168.2'
+
+app_anycast = '192.168.0.2'
 
 bgp_host = '11'
 og_host = '12'
@@ -241,6 +243,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     og1.vm.network 'private_network',
                        virtualbox__intnet: 'bgp1og1',
                        ip: dc1_anycast_subnet + '.' + og1_host
+    og1.vm.network 'private_network', virtualbox__intnet: 'appany1',
+	               ip: app_anycast
     og1.vm.provision 'shell', privileged: true, path: 'og-setup.sh'
 
     # Pull and run (then remove) our image in order to do the devbind
@@ -277,6 +281,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       vb.customize ['modifyvm', :id, '--nicpromisc3', 'allow-all']
       vb.customize ['modifyvm', :id, '--nicpromisc4', 'allow-all']
       vb.customize ['modifyvm', :id, '--nicpromisc5', 'allow-all']
+      vb.customize ['modifyvm', :id, '--nicpromisc6', 'allow-all']
       # Configure VirtualBox to enable passthrough of SSE 4.1 and SSE 4.2 instructions,
       # according to this: https://www.virtualbox.org/manual/ch09.html#sse412passthrough
       # This step is fundamental otherwise DPDK won't build. It is possible to verify in
@@ -314,6 +319,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     og2.vm.network 'private_network',
                        virtualbox__intnet: 'bgp2og2',
                        ip: dc2_anycast_subnet + '.' + og2_host
+    og2.vm.network 'private_network', virtualbox__intnet: 'appany2',
+	               ip: app_anycast
     og2.vm.provision 'shell', privileged: true, path: 'og-setup.sh'
 
     # Pull and run (then remove) our image in order to do the devbind
@@ -350,6 +357,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       vb.customize ['modifyvm', :id, '--nicpromisc3', 'allow-all']
       vb.customize ['modifyvm', :id, '--nicpromisc4', 'allow-all']
       vb.customize ['modifyvm', :id, '--nicpromisc5', 'allow-all']
+      vb.customize ['modifyvm', :id, '--nicpromisc6', 'allow-all']
       # Configure VirtualBox to enable passthrough of SSE 4.1 and SSE 4.2 instructions,
       # according to this: https://www.virtualbox.org/manual/ch09.html#sse412passthrough
       # This step is fundamental otherwise DPDK won't build. It is possible to verify in

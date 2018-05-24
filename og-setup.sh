@@ -25,11 +25,14 @@ echo "hugetlbfs /mnt/huge hugetlbfs rw,mode=0777 0 0" >> /etc/fstab
 # and 'rp_filter' work together: https://marc.info/?l=linux-kernel&m=123606366021995&w=2
 echo "0" > /proc/sys/net/ipv4/conf/all/rp_filter
 echo "0" > /proc/sys/net/ipv4/conf/default/rp_filter
-echo "0" > /proc/sys/net/ipv4/conf/enp0s8/rp_filter
-echo "0" > /proc/sys/net/ipv4/conf/enp0s9/rp_filter
+echo "0" > /proc/sys/net/ipv4/conf/enp0s10/rp_filter
+echo "0" > /proc/sys/net/ipv4/conf/enp0s16/rp_filter
+echo "0" > /proc/sys/net/ipv4/conf/enp0s17/rp_filter
 echo "net.ipv4.conf.default.rp_filter = 0" >> /etc/sysctl.conf
 echo "net.ipv4.conf.all.rp_filter = 0" >> /etc/sysctl.conf
-echo "net.ipv4.conf.enp0s8.rp_filter = 0" >> /etc/sysctl.conf
+echo "net.ipv4.conf.enp0s10.rp_filter = 0" >> /etc/sysctl.conf
+echo "net.ipv4.conf.enp0s16.rp_filter = 0" >> /etc/sysctl.conf
+echo "net.ipv4.conf.enp0s17.rp_filter = 0" >> /etc/sysctl.conf
 
 # enable ip forwarding, so packets can be passed to different interfaces
 echo "1" > /proc/sys/net/ipv4/ip_forward
