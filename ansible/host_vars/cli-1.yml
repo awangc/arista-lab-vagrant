@@ -1,9 +1,21 @@
 ---
 # host_vars/cli-1.yml
-anycast_subnets: 
-  - "{{ app_anycast }}"
+
+subnets_to_reach_default_gateway: "{{ dcs.dc1.client_network_prefix }}.{{ dcs.dc1.spine_host }}" # spine-1 client network address
+
+subnets_to_reach:
+  - "{{ dcs.dc2.client_network }}"
+  - "{{ dcs.dc1.app_network }}"
+  - "{{ dcs.dc2.app_network }}"
+  - "{{ dcs.dc1.og_network }}"
+  - "{{ dcs.dc2.og_network }}"
+  - "{{ dcs.dc1.bgp_network }}"
+  - "{{ dcs.dc2.bgp_network }}"
   - "{{ dcs.dc1.anycast }}"
   - "{{ dcs.dc2.anycast }}"
+  - "{{ spine_network }}"
+  - "{{ app_anycast }}"
 
-anycast_default_gateway: "{{ dcs.dc1.client_network_prefix }}.{{ dcs.dc1.spine_host }}" # spine-1 client network address
+cli_interfaces: # see comments in Vagrantfile, regarding naming of interfaces for private network interfaces
+  - enp0s8
 

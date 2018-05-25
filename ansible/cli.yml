@@ -17,6 +17,6 @@
   tasks:
 
   - name: routing for anycast subnet uses spine as default gateway
-    shell: ip route add {{ item }} via {{ anycast_default_gateway }} dev enp0s8
-    with_items: "{{ anycast_subnets }}"  
+    shell: ip route add {{ item }} via {{ subnets_to_reach_default_gateway }} dev {{ cli_interfaces[0] }}
+    with_items: "{{ subnets_to_reach }}"
     ignore_errors: yes # adding a route that exists will result in error

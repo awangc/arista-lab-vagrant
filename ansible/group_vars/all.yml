@@ -55,3 +55,17 @@ dcs:
     anycast: "192.168.1.0/24"
     med: 10
     spine_host: '10'
+
+subnets_to_reach:
+  - "{{ dcs.dc1.client_network }}"
+  - "{{ dcs.dc2.client_network }}"
+  - "{{ dcs.dc1.app_network }}"
+  - "{{ dcs.dc2.app_network }}"
+  - "{{ dcs.dc1.og_network }}"
+  - "{{ dcs.dc2.og_network }}"
+  - "{{ dcs.dc1.bgp_network }}"
+  - "{{ dcs.dc2.bgp_network }}"
+  - "{{ dcs.dc1.anycast }}"
+  - "{{ dcs.dc2.anycast }}"
+  - "{{ spine_network }}"
+  - "{{ app_anycast }}"

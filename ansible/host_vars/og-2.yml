@@ -1,16 +1,24 @@
 ---
 # host_vars/og-2.yml
 
-common_network: '10.0.253' # to communicate to spine devices
+subnets_to_reach_default_gateway: "{{ dcs.dc2.og_network_prefix }}.{{ dcs.dc2.spine_host }}" # spine-2 og network address
+
+subnets_to_reach:
+  - "{{ dcs.dc1.client_network }}"
+  - "{{ dcs.dc2.client_network }}"
+  - "{{ dcs.dc1.app_network }}"
+  - "{{ dcs.dc2.app_network }}"
+  - "{{ dcs.dc1.og_network }}"
+  - "{{ dcs.dc1.bgp_network }}"
+  - "{{ dcs.dc2.bgp_network }}"
+  - "{{ dcs.dc1.anycast }}"
+  - "{{ dcs.dc2.anycast }}"
+  - "{{ spine_network }}"
+  - "{{ app_anycast }}"
+
 og_host: '12'
-default_gateway_client: '10.0.253.22' # spine IP address connected to og
-client_network: 
-  - '10.0.151.0/24'
-  - '10.0.251.0/24'
-
-anycast_range: 192.168.0.0/16 # CIDR used for anycast IP
-
 og_interfaces: # see comments in Vagrantfile, regarding naming of interfaces for private network interfaces
-  - enp0s8
-  - enp0s9
+  - enp0s10 # for connection with spine
+  - enp0s16 # for dc anycast
+  - enp0s17 # for app anycast
 
