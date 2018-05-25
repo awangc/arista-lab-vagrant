@@ -7,7 +7,7 @@
       "providers": [
         {
           "name": "virtualbox",
-          "url": "file:////mnt/gtm/arista-lab-vagrant/config/vEOS-lab-4.20.1F-virtualbox.box"
+          "url": "http://yumrepo.sys.comcast.net/cap/x86_64/6/global/vEOS-lab-4.20.1F-virtualbox.box"
         }
       ]
     }
