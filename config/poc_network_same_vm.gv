@@ -1,0 +1,37 @@
+graph {
+
+  newrank=true // to allow ranking of nodes in different clusters
+
+  subgraph cluster_2 {
+    subgraph cluster_0 {
+      label="Same  VM?"
+      style=dotted
+      "bgp-1" -- "og-1"
+    }
+    label="ASN A            ";
+    "spine-1" -- "bgp-1"
+    "spine-1" -- "app-1"
+    "app-1" [label="app"];
+  }
+
+  subgraph cluster_3 {
+    subgraph cluster_1 {
+      label="Same  VM?"
+      style=dotted;
+      "bgp-2" -- "og-2"
+    }
+
+    label = "            ASN B";
+    "spine-2" -- "bgp-2"
+    "spine-2" -- "app-2"
+    "app-2" [label="app"];
+  }
+
+  "client-1" [shape=box];
+  "client-2" [shape=box];
+
+  "client-1" -- "spine-1";
+  "client-2" -- "spine-2";
+
+  {rank=same; "spine-1" -- "spine-2"}
+}
