@@ -42,7 +42,7 @@
 - name: add default gateway for routes to other bgp subnets
   become: yes
   become_user: root
-  shell: ip route add {{ item }} via {{ bgp_fabric.neighbor.local_ip }} dev enp0s8
+  shell: ip route add {{ item }} via {{ bgp_fabric.neighbor.local_ip }} dev {{ bgp_interfaces[0] }}
   with_items: "{{ bgp_subnets }}"
   ignore_errors: yes 
 

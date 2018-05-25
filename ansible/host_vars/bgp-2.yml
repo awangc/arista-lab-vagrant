@@ -13,7 +13,7 @@ bgp_fabric:
       med: "{{ dcs.dc2.med }}"
     - range: "{{ dcs.dc2.anycast }}"
       med: "{{ dcs.dc2.med }}"
-  anycast_nexthop: "{{ dcs.dc1.og_network_prefix }}.{{ og_host }}"
+  anycast_nexthop: "{{ dcs.dc2.og_network_prefix }}.{{ og_host }}"
 
 bgp_subnets:
   - "{{ dcs.dc1.bgp_network }}"
